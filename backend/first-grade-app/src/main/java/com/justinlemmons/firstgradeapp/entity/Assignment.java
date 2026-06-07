@@ -2,12 +2,16 @@ package com.justinlemmons.firstgradeapp.entity;
 
 import com.justinlemmons.firstgradeapp.enums.Subject;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "assignments")
 public class Assignment {

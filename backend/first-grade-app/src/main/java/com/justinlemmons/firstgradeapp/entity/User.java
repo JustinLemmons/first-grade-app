@@ -2,11 +2,15 @@ package com.justinlemmons.firstgradeapp.entity;
 
 import com.justinlemmons.firstgradeapp.enums.Role;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {

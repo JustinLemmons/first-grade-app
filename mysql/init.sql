@@ -3,57 +3,75 @@ USE first_grade_db;
 
 -- Tables --
 
+CREATE TABLE users (
+	 id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+   	 email         VARCHAR(255) NOT NULL UNIQUE,
+   	 password_hash VARCHAR(255) NOT NULL,
+   	 role          ENUM('ADMIN', 'TEACHER', 'STUDENT') NOT NULL,
+   	 enabled       BOOLEAN NOT NULL DEFAULT TRUE,
+   	 created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE teachers (
 	id		BIGINT AUTO_INCREMENT PRIMARY KEY,
+	user_id 	BIGINT NOT NULL,
 	first_name 	VARCHAR(100) NOT NULL,
 	last_name	VARCHAR(100) NOT NULL,
-	email 		VARCHAR(255) NOT NULL UNIQUE,
-	created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT      fk_teachers_users FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE students (
 	id		BIGINT AUTO_INCREMENT PRIMARY KEY,
+	user_id 	BIGINT NOT NULL,
 	first_name	VARCHAR(100) NOT NULL,
 	last_name	VARCHAR(100) NOT NULL,
-	email		VARCHAR(255) NOT NULL UNIQUE,
 	teacher_id	BIGINT NOT NULL,
 	created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT 	fk_student_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+	CONSTRAINT      fk_students_users    FOREIGN KEY (user_id)    REFERENCES users(id),
+	CONSTRAINT 	fk_students_teachers FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
 CREATE TABLE assignments (
-	id		BIGINT AUTO-INCREMENT PRIMARY KEY,
+	id		BIGINT AUTO_INCREMENT PRIMARY KEY,
 	title		VARCHAR(255) NOT NULL,
 	description	TEXT,
 	subject		ENUM('MATH', 'WRITING') NOT NULL,
 	due_date	DATE NOT NULL,
 	teacher_id	BIGINT NOT NULL,
 	created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT fk_assignment_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+	CONSTRAINT      fk_assignments_teachers FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
 CREATE TABLE student_assignments (
-	id		BIGINT AUTO-INCREMENT PRIMARY KEY,
+	id		BIGINT AUTO_INCREMENT PRIMARY KEY,
 	student_id	BIGINT NOT NULL,
 	assignment_id	BIGINT NOT NULL,
 	grade		DECIMAL(5,2),
 	submitted_at	TIMESTAMP,
 	created_at	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	CONSTRAINT fk_sa_student FOREIGN KEY (student_id) REFERENCES students(id)		 ON DELETE(CASCADE),
-	CONSTRAINT fk_sa_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id) 	 ON DELETE(CASCADE),
-	CONSTRAINT uq_student_assignment UNIQUE (student_id, assignment_id)
+	CONSTRAINT      fk_sa_students FOREIGN KEY (student_id) REFERENCES students(id)			 ON DELETE CASCADE,
+	CONSTRAINT      fk_sa_assignments FOREIGN KEY (assignment_id) REFERENCES assignments(id) 	 ON DELETE CASCADE,
 );
 
 -- Seed Data
 
-INSERT INTO teachers (first_name, last_name, email)
-VALUES ('Kara', 'Lemmons', 'Kara.Lemmons@gmail.com');
-
-INSERT INTO students (first_name, last_name, email, teacher_id)
+-- password_hash values below represent BCrypt hash of 'password123'
+INSERT INTO users (email, password_hash, role)
 VALUES
-    ('Lyla', 'Olivia', 'lyla.olivia@school.edu', 1),
-    ('Bobby',   'Boy','boby.boy@school.edu',   1),
-    ('Billy', 'McShake',   'billy.mcshake@school.edu', 1);
+    ('admin@school.edu',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN'),
+    ('justinlee.lemmons@yahoo.com','$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'TEACHER'),
+    ('lyla.olivia@school.edu',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'STUDENT'),
+    ('bobby.boy@school.edu',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'STUDENT'),
+    ('billy.mcshake@school.edu',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'STUDENT');
+
+INSERT INTO teachers (user_id, first_name, last_name) VALUES (2, 'KJ', 'Lemmons');
+
+INSERT INTO students (user_id, first_name, last_name, teacher_id)
+VALUES
+    (3, 'Lyla', 'Olivia', 1),
+    (4, 'Bobby',   'Boy', 1),
+    (5, 'Billy', 'McShake', 1);
 
 INSERT INTO assignments (title, description, subject, due_date, teacher_id)
 VALUES
